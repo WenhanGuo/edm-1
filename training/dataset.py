@@ -168,6 +168,7 @@ class ImageFolderDataset(Dataset):
         path,                   # Path to directory or zip.
         resolution      = None, # Ensure specific resolution, None = highest available.
         use_pyspng      = True, # Use pyspng if available?
+        max_images      = None, # Limit to the first N images (sorted). None = no limit.
         **super_kwargs,         # Additional arguments for the Dataset base class.
     ):
         self._path = path
@@ -185,6 +186,8 @@ class ImageFolderDataset(Dataset):
 
         PIL.Image.init()
         self._image_fnames = sorted(fname for fname in self._all_fnames if self._file_ext(fname) in PIL.Image.EXTENSION)
+        if max_images is not None:
+            self._image_fnames = self._image_fnames[:max_images]
         if len(self._image_fnames) == 0:
             raise IOError('No image files found in the specified path')
 
