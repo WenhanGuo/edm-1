@@ -169,11 +169,13 @@ class ImageFolderDataset(Dataset):
         resolution      = None, # Ensure specific resolution, None = highest available.
         use_pyspng      = True, # Use pyspng if available?
         max_images      = None, # Limit to the first N images (sorted). None = no limit.
+        grayscale       = False, # Convert images to grayscale?
         **super_kwargs,         # Additional arguments for the Dataset base class.
     ):
         self._path = path
         self._use_pyspng = use_pyspng
         self._zipfile = None
+        self._grayscale = grayscale
 
         if os.path.isdir(self._path):
             self._type = 'dir'
@@ -233,6 +235,8 @@ class ImageFolderDataset(Dataset):
                 image = np.array(PIL.Image.open(f))
         if image.ndim == 2:
             image = image[:, :, np.newaxis] # HW => HWC
+        if self._grayscale and image.shape[2] == 3:
+            image = np.array(PIL.Image.fromarray(image).convert('L'))[:, :, np.newaxis]
         image = image.transpose(2, 0, 1) # HWC => CHW
         return image
 
